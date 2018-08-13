@@ -1,55 +1,85 @@
 //Testing GitHub
 
-const width = 500;
-const heigth = 500;
+const WIDTH = 500;
+const HEIGHT = 500;
+const BALL_LIMIT = 20;
 
-var ball = {
-	x: width/2,
-	y: heigth/2,
-	d: 50,
-	speed: {x: 3, y: 4},
-	col: {r : 0, g: 10, b: 0}
+let balls = [];
+let ball_amount = 0;
+
+let edge = {
+  top: 0,
+  bottom: HEIGHT,
+  left: 0,
+  right: WIDTH
 };
-
-var edge = {
-	top: 0,
-	bottom: heigth,
-	left: 0,
-	right: width
-};
-
-function display() {
-	noStroke();
-	fill(ball.col.r, ball.col.g, ball.col.b);
-	ellipse(ball.x, ball.y, ball.d, ball.d);
-}
-
-function bounce() {
-	if (ball.x >= edge.right - ball.d/2 || ball.x <= edge.left + ball.d/2) {
-		ball.speed.x = ball.speed.x * -1;
-	}
-	 if (ball.y <= edge.top + ball.d/2 || ball.y >= edge.bottom - ball.d/2) {
-	 	 ball.speed.y = ball.speed.y * -1;
-	}
-}
-
-function move() {
-	ball.x += ball.speed.x;
-	ball.y += ball.speed.y;
-}
 
 function setup() {
-	createCanvas(heigth, width);
+  createCanvas(HEIGHT, WIDTH);
+}
+
+function mousePressed() {
+  createBall();
 }
 
 function draw() {
-	background(0);
+  background(0);
+  for (let i = 0; i < balls.length; i++) {
+    balls[i].color.r = map(balls[i].x, 0, WIDTH, 150, 255);
+    balls[i].color.g = map(balls[i].y, 0, HEIGHT, 0, 120);
+    balls[i].color.b = map(balls[i].y, 0, HEIGHT, 100, 255);
 
-	ball.col.r = map(ball.x, 0, width, 150, 255);
-	ball.col.b = map(ball.y, 0, heigth, 100, 255);
+    balls[i].show();
+    balls[i].move();
+    balls[i].bounce();
+  }
+}
 
-	display();
-	move();
-	bounce();
+class Ball {
+  constructor(x, y, s_x, s_y) {
+    this.x = x;
+    this.y = y;
+    this.d = 50;
+    this.speed = {
+      x: s_x,
+      y: s_y
+    };
+    this.color = {
+      r: 0,
+      g: 10,
+      b: 0
+    };
+  }
 
+  show() {
+    noStroke();
+    fill(this.color.r, this.color.g, this.color.b);
+    ellipse(this.x, this.y, this.d, this.d);
+  }
+
+  move() {
+    this.x += this.speed.x;
+    this.y += this.speed.y;
+  }
+
+  bounce() {
+    if (this.x >= edge.right - this.d / 2 || this.x <= edge.left + this.d / 2) {
+      this.speed.x = this.speed.x * -1;
+    }
+
+    if (this.y <= edge.top + this.d / 2 || this.y >= edge.bottom - this.d / 2) {
+      this.speed.y = this.speed.y * -1;
+    }
+  }
+}
+
+function createBall() {
+  if (ball_amount <= BALL_LIMIT) {
+    let s_x = random(2, 7);
+    let s_y = random(2, 7);
+
+    let ball = new Ball(mouseX, mouseY, s_x, s_y);
+    balls.push(ball);
+    ball_amount += 1;
+  }
 }
