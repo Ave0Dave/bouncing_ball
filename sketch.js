@@ -1,8 +1,6 @@
-//Testing GitHub
-
-const WIDTH = 500;
-const HEIGHT = 500;
-const BALL_LIMIT = 20;
+const WIDTH = 700;
+const HEIGHT = 700;
+const BALL_LIMIT = 4;
 
 let balls = [];
 let ball_amount = 0;
@@ -18,31 +16,49 @@ function setup() {
   createCanvas(HEIGHT, WIDTH);
 }
 
-function mousePressed() {
-  createBall();
+function draw() {
+  background(204, 235, 255);
+  //for (let i = 0; i < balls.length; i++) {
+  for (let ball of balls) {
+    ball.show();
+    ball.move();
+    ball.changeColor(HEIGHT, WIDTH);
+    ball.bounce();
+    ball.drag(mouseX, mouseY);
+    ball.stayInsideCanvas();
+    for (let other of balls) {
+      if (ball != other && ball.intersects(other) && !ball.isbeingdragged && !other.isbeingdragged) { //todo: optimize checking other balls
+        ball.rebound();
+      }
+    }
+  }
+
 }
 
-function draw() {
-  background(0);
-  for (let i = 0; i < balls.length; i++) {
-    balls[i].color.r = map(balls[i].x, 0, WIDTH, 150, 255);
-    balls[i].color.g = map(balls[i].y, 0, HEIGHT, 0, 120);
-    balls[i].color.b = map(balls[i].y, 0, HEIGHT, 100, 255);
+function mousePressed() {
+  createBall();
+  for (let ball of balls) {
+    ball.mouseInside(mouseX, mouseY);
+  }
+}
 
-    balls[i].show();
-    balls[i].move();
-    balls[i].bounce();
+function createBall() { //can I move inside the Ball class?
+  if (ball_amount < BALL_LIMIT) {
+    let ball = new Ball(mouseX, mouseY);
+    balls.push(ball);
+    ball_amount++;
   }
 }
 
 class Ball {
-  constructor(x, y, s_x, s_y) {
+  constructor(x, y) {
     this.x = x;
     this.y = y;
-    this.d = 50;
+    this.d = 90;
+    this.r = this.d / 2;
     this.speed = {
-      x: s_x,
-      y: s_y
+      x: random(1, 4),
+      y: random(1, 4)
     };
     this.color = {
       r: 0,
@@ -53,7 +69,7 @@ class Ball {
 
   show() {
     noStroke();
-    fill(this.color.r, this.color.g, this.color.b);
+    fill(this.color.r, this.color.g, this.color.b)
     ellipse(this.x, this.y, this.d, this.d);
   }
 
@@ -62,24 +78,63 @@ class Ball {
     this.y += this.speed.y;
   }
 
+  changeColor(value_1, value_2) {
+    this.color.r = map(this.x, 0, value_1, 150, 255);
+    this.color.g = map(this.y, 0, value_2, 0, 120);
+    this.color.b = map(this.y, 0, value_2, 100, 255);
+  }
+
   bounce() {
     if (this.x >= edge.right - this.d / 2 || this.x <= edge.left + this.d / 2) {
-      this.speed.x = this.speed.x * -1;
+      this.speed.x = this.speed.x * -1; //todo: make bounce() and rebound() one function
     }
 
     if (this.y <= edge.top + this.d / 2 || this.y >= edge.bottom - this.d / 2) {
       this.speed.y = this.speed.y * -1;
     }
   }
-}
 
-function createBall() {
-  if (ball_amount <= BALL_LIMIT) {
-    let s_x = random(2, 7);
-    let s_y = random(2, 7);
+  rebound() {
+    this.speed.x = this.speed.x * -1;
+    this.speed.y = this.speed.y * -1;
+  }
 
-    let ball = new Ball(mouseX, mouseY, s_x, s_y);
-    balls.push(ball);
-    ball_amount += 1;
+  mouseInside(x, y) { //can't use it as a boolean in drag()
+    let distance = dist(this.x, this.y, x, y);
+    this.locked = (distance < this.r);
+  }
+
+  drag(x, y) {
+    this.isbeingdragged = false;
+    if (ball_amount == BALL_LIMIT) {
+      for (let ball of balls) {
+        if (mouseIsPressed && this.locked) {
+          this.x = x;
+          this.y = y;
+          this.isbeingdragged = true;
+          break;
+        }
+      }
+    }
+  }
+
+  intersects(other) {
+    let distance = dist(this.x, this.y, other.x, other.y);
+    return (distance <= this.r + other.r);
+  }
+
+  stayInsideCanvas() {
+    if (this.x >= (edge.right - this.d / 2)) {
+      this.x = edge.right - this.d / 2;
+    }
+    if (this.x <= (edge.left + this.d / 2)) {
+      this.x = edge.left + this.d / 2;
+    }
+    if (this.y <= (edge.top + this.d / 2)) {
+      this.y = edge.top + this.d / 2;
+    }
+    if (this.y >= (edge.bottom - this.d / 2)) {
+      this.y = edge.bottom - this.d / 2;
+    }
   }
 }
