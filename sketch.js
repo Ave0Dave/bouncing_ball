@@ -1,6 +1,6 @@
 const WIDTH = 700;
 const HEIGHT = 700;
-const BALL_LIMIT = 10;
+const BALL_LIMIT = 15;
 
 let balls = [];
 let ball_amount = 0;
@@ -14,33 +14,31 @@ let edge = {
 
 function setup() {
   createCanvas(HEIGHT, WIDTH);
-  balls[0] = new Ball; //todo: fix this horrible workaround
 }
 
 function draw() {
   background(204, 235, 255);
-  //for (let i = 0; i < balls.length; i++) {
-  for (let ball of balls) {
-    ball.show();
-    ball.move();
-    ball.changeColor(HEIGHT, WIDTH);
-    ball.bounce();
-    ball.drag(mouseX, mouseY);
-    ball.stayInsideCanvas();
-    for (let other of balls) {
-      if (ball != other && ball.intersects(other) && !ball.isbeingdragged && !other.isbeingdragged) { //todo: optimize checking other balls
-      }
+  for (let i = 0; i < balls.length; i++) {
+  // for (let ball of balls) {
+  balls[i].show();
+  balls[i].move();
+  balls[i].changeColor(HEIGHT, WIDTH);
+  balls[i].bounce();
+  balls[i].drag(mouseX, mouseY);
+  balls[i].stayInsideCanvas();
+    for (let j = i + 1; j < balls.length; j++)  {
+      if (balls[i].intersects(balls[j]) && !balls[i].isbeingdragged && !balls[j].isbeingdragged) {
+        balls[i].rebound();
+        balls[j].rebound();
+      } 
     }
   }
 }
 
-function mousePressed() { //have to be in separate loops becouse of break statement
+function mousePressed() {
+  Ball.createBall();
   for (let ball of balls) {
-    ball.createBall();
-    break;
-  }
-  for (let ball of balls) {
-    ball.mouseInside(mouseX, mouseY); //if moved to setup() locked boolean doesn't work properly
+    ball.mouseInside(mouseX, mouseY);
   }
 }
 
@@ -61,7 +59,7 @@ class Ball {
     };
   }
 
-  createBall() {
+  static createBall() {
     if (ball_amount < BALL_LIMIT) {
       let ball = new Ball(mouseX, mouseY);
       balls.push(ball);
@@ -121,7 +119,7 @@ class Ball {
   }
 
   intersects(other) {
-    let distance = dist(this.x, this.y, other.x, other.y);
+    let distance = dist(this.x + this.speed.x, this.y + this.speed.y, other.x + other.speed.x, other.y + other.speed.y);
     return (distance <= this.r + other.r); //todo: fix collision detection
   }
 
