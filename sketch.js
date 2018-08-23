@@ -1,6 +1,6 @@
 const WIDTH = 700;
 const HEIGHT = 700;
-const BALL_LIMIT = 4;
+const BALL_LIMIT = 10;
 
 let balls = [];
 let ball_amount = 0;
@@ -14,6 +14,7 @@ let edge = {
 
 function setup() {
   createCanvas(HEIGHT, WIDTH);
+  balls[0] = new Ball; //todo: fix this horrible workaround
 }
 
 function draw() {
@@ -28,25 +29,18 @@ function draw() {
     ball.stayInsideCanvas();
     for (let other of balls) {
       if (ball != other && ball.intersects(other) && !ball.isbeingdragged && !other.isbeingdragged) { //todo: optimize checking other balls
-        ball.rebound();
       }
     }
   }
-
 }
 
-function mousePressed() {
-  createBall();
+function mousePressed() { //have to be in separate loops becouse of break statement
   for (let ball of balls) {
-    ball.mouseInside(mouseX, mouseY);
+    ball.createBall();
+    break;
   }
-}
-
-function createBall() { //can I move inside the Ball class?
-  if (ball_amount < BALL_LIMIT) {
-    let ball = new Ball(mouseX, mouseY);
-    balls.push(ball);
-    ball_amount++;
+  for (let ball of balls) {
+    ball.mouseInside(mouseX, mouseY); //if moved to setup() locked boolean doesn't work properly
   }
 }
 
@@ -65,6 +59,14 @@ class Ball {
       g: 10,
       b: 0
     };
+  }
+
+  createBall() {
+    if (ball_amount < BALL_LIMIT) {
+      let ball = new Ball(mouseX, mouseY);
+      balls.push(ball);
+      ball_amount++;
+    }
   }
 
   show() {
@@ -99,7 +101,7 @@ class Ball {
     this.speed.y = this.speed.y * -1;
   }
 
-  mouseInside(x, y) { //can't use it as a boolean in drag()
+  mouseInside(x, y) { //can't use it as a boolean in drag()??
     let distance = dist(this.x, this.y, x, y);
     this.locked = (distance < this.r);
   }
@@ -120,7 +122,7 @@ class Ball {
 
   intersects(other) {
     let distance = dist(this.x, this.y, other.x, other.y);
-    return (distance <= this.r + other.r);
+    return (distance <= this.r + other.r); //todo: fix collision detection
   }
 
   stayInsideCanvas() {
