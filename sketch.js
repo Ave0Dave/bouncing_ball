@@ -1,6 +1,6 @@
 const WIDTH = 700;
 const HEIGHT = 700;
-const BALL_LIMIT = 15;
+const BALL_LIMIT = 10;
 
 let balls = [];
 let ball_amount = 0;
@@ -12,17 +12,24 @@ let edge = {
   right: WIDTH
 };
 
+let imgs = [];
+
+function preload() {
+  for (let i = 0; i < 4; i++) {
+    imgs[i] = loadImage(`images/icon${i}.png`);
+  }
+}
+
 function setup() {
   createCanvas(HEIGHT, WIDTH);
 }
 
 function draw() {
-  background(204, 235, 255);
+  background(0, 75, 155);
   for (let i = 0; i < balls.length; i++) {
     // for (let ball of balls) {
     balls[i].show();
     balls[i].move();
-    balls[i].changeColor(HEIGHT, WIDTH);
     balls[i].bounce();
     balls[i].drag(mouseX, mouseY);
     balls[i].stayInsideCanvas();
@@ -43,11 +50,12 @@ function mousePressed() {
 }
 
 class Ball {
-  constructor(x, y) {
+  constructor(x, y, img) {
     this.x = x;
     this.y = y;
-    this.d = 90;
+    this.d = 120;
     this.r = this.d / 2;
+    this.img = img;
     this.speed = {
       x: random(1, 4),
       y: random(1, 4)
@@ -60,28 +68,22 @@ class Ball {
   }
 
   static createBall() {
+    let img = random(imgs);
     if (ball_amount < BALL_LIMIT) {
-      let ball = new Ball(mouseX, mouseY);
+      let ball = new Ball(mouseX, mouseY, img);
       balls.push(ball);
       ball_amount++;
     }
   }
 
   show() {
-    noStroke();
-    fill(this.color.r, this.color.g, this.color.b)
-    ellipse(this.x, this.y, this.d, this.d);
+    image(this.img, this.x - this.r, this.y - this.r, this.d, this.d);
+    // - this.r to center the image
   }
 
   move() {
     this.x += this.speed.x;
     this.y += this.speed.y;
-  }
-
-  changeColor(value_1, value_2) {
-    this.color.r = map(this.x, 0, value_1, 150, 255);
-    this.color.g = map(this.y, 0, value_2, 0, 120);
-    this.color.b = map(this.y, 0, value_2, 100, 255);
   }
 
   bounce() {
