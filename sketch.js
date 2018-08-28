@@ -19,18 +19,18 @@ function setup() {
 function draw() {
   background(204, 235, 255);
   for (let i = 0; i < balls.length; i++) {
-  // for (let ball of balls) {
-  balls[i].show();
-  balls[i].move();
-  balls[i].changeColor(HEIGHT, WIDTH);
-  balls[i].bounce();
-  balls[i].drag(mouseX, mouseY);
-  balls[i].stayInsideCanvas();
-    for (let j = i + 1; j < balls.length; j++)  {
+    // for (let ball of balls) {
+    balls[i].show();
+    balls[i].move();
+    balls[i].changeColor(HEIGHT, WIDTH);
+    balls[i].bounce();
+    balls[i].drag(mouseX, mouseY);
+    balls[i].stayInsideCanvas();
+    for (let j = i + 1; j < balls.length; j++) {
       if (balls[i].intersects(balls[j]) && !balls[i].isbeingdragged && !balls[j].isbeingdragged) {
         balls[i].rebound();
         balls[j].rebound();
-      } 
+      }
     }
   }
 }
@@ -99,7 +99,7 @@ class Ball {
     this.speed.y = this.speed.y * -1;
   }
 
-  mouseInside(x, y) { //can't use it as a boolean in drag()??
+  mouseInside(x, y) {
     let distance = dist(this.x, this.y, x, y);
     this.locked = (distance < this.r);
   }
@@ -120,7 +120,7 @@ class Ball {
 
   intersects(other) {
     let distance = dist(this.x + this.speed.x, this.y + this.speed.y, other.x + other.speed.x, other.y + other.speed.y);
-    return (distance <= this.r + other.r); //todo: fix collision detection
+    return (distance <= this.r + other.r);
   }
 
   stayInsideCanvas() {
